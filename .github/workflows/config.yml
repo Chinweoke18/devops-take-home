@@ -40,9 +40,14 @@ jobs:
       run: |
         docker build -t $ECR_REPOSITORY:${{ steps.build-number.outputs.build_number }} .
 
+    - name: Tag the Docker image
+      run: |
+        docker tag $ECR_REPOSITORY:${{ steps.build-number.outputs.build_number }} $ECR_REPOSITORY:${{ steps.build-number.outputs.build_number }}:latest
+
     - name: Push the Docker image to ECR
       run: |
         docker push $ECR_REPOSITORY:${{ steps.build-number.outputs.build_number }}
+        docker push $ECR_REPOSITORY:latest
 
     - name: Setup kubectl
       uses: azure/setup-kubectl@v3
