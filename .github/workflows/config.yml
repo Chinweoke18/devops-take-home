@@ -42,7 +42,7 @@ jobs:
 
     - name: Tag the Docker image
       run: |
-        docker tag $ECR_REPOSITORY:${{ steps.build-number.outputs.build_number }} $ECR_REPOSITORY:${{ steps.build-number.outputs.build_number }}:latest
+        docker tag $ECR_REPOSITORY:${{ steps.build-number.outputs.build_number }} $ECR_REPOSITORY:latest
 
     - name: Push the Docker image to ECR
       run: |
