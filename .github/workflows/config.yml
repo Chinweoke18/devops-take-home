@@ -37,7 +37,7 @@ jobs:
 
     - name: Build the Docker image
       run: |
-        docker build -t $ECR_REPOSITORY_NAME:${{ steps.build-number.outputs.build_number }} .
+        docker build -t $ECR_REPOSITORY:${{ steps.build-number.outputs.build_number }} .
 
     - name: Push the Docker image to ECR
       run: |
