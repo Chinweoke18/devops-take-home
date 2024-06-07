@@ -7,7 +7,7 @@ on:
 
 env:
   AWS_REGION: us-east-1
-  AWS_ACCOUNT_ID: 123456789012  
+  AWS_ACCOUNT_ID: 211125593418  
   ECR_REPOSITORY: 211125593418.dkr.ecr.us-east-1.amazonaws.com/app-repo
 
 jobs:
@@ -21,6 +21,8 @@ jobs:
     - name: Login to AWS ECR
       id: login-ecr
       run: |
+        echo ${{ secrets.AWS_ACCESS_KEY_ID }} | aws configure --profile ecr-user aws_access_key_id
+        echo ${{ secrets.AWS_SECRET_ACCESS_KEY }} | aws configure --profile ecr-user aws_secret_access_key
         aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
 
     - name: Get the build number
