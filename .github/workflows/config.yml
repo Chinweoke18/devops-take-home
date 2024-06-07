@@ -21,8 +21,6 @@ jobs:
     - name: Login to AWS ECR
       id: login-ecr
       run: |
-        echo ${{ secrets.AWS_ACCESS_KEY_ID }} | aws configure --profile ecr-user aws_access_key_id
-        echo ${{ secrets.AWS_SECRET_ACCESS_KEY }} | aws configure --profile ecr-user aws_secret_access_key
         aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
 
     - name: Get the build number
@@ -32,10 +30,6 @@ jobs:
     - name: Build the Docker image
       run: |
         docker build -t $ECR_REPOSITORY_NAME:${{ steps.build-number.outputs.build_number }} .
-
-    # - name: Tag the Docker image
-    #   run: |
-    #     docker tag $ECR_REPOSITORY_NAME:${{ steps.build-number.outputs.build_number }} $ECR_REPOSITORY_NAME:latest
 
     - name: Push the Docker image to ECR
       run: |
