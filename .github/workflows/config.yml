@@ -18,6 +18,12 @@ jobs:
     - name: Check out code
       uses: actions/checkout@v2
 
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4 # More information on this action can be found below in the 'AWS Credentials' section
+      with:
+        role-to-assume: arn:aws:iam::211125593418:role/github-actions-role
+        aws-region: us-east-1
+
     # - name: Login to AWS ECR
     #   id: login-ecr
     #   run: |
