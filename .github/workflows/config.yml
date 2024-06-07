@@ -41,4 +41,4 @@ jobs:
 
     - name: Push the Docker image to ECR
       run: |
-        docker push $ECR_REPOSITORY_NAME:${{ steps.build-number.outputs.build_number }}
+        docker push $ECR_REPOSITORY:${{ steps.build-number.outputs.build_number }}
