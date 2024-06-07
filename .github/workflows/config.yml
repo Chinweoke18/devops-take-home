@@ -18,12 +18,12 @@ jobs:
     - name: Check out code
       uses: actions/checkout@v2
 
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v2
-
-    - name: Log in to Amazon ECR
+    - name: Login to AWS ECR
       id: login-ecr
-      uses: aws-actions/amazon-ecr-login@v1
+      run: |
+        echo ${{ secrets.AWS_ACCESS_KEY_ID }} | aws configure --profile ecr-user aws_access_key_id
+        echo ${{ secrets.AWS_SECRET_ACCESS_KEY }} | aws configure --profile ecr-user aws_secret_access_key
+        aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
 
     - name: Get the build number
       id: build-number
