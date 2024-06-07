@@ -1,0 +1,79 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Template to create an EKS Fargate cluster.
+
+Resources:
+  # EKS Cluster Role
+  EKSClusterRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - eks.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonEKSClusterPolicy
+        - arn:aws:iam::aws:policy/AmazonEKSServicePolicy
+      Tags:
+        - Key: Name
+          Value: EKSClusterRole
+
+  # EKS Cluster
+  EKSCluster:
+    Type: 'AWS::EKS::Cluster'
+    Properties:
+      Name: MyEKSCluster
+      RoleArn: !GetAtt EKSClusterRole.Arn
+      ResourcesVpcConfig:
+        SubnetIds:
+          - 'subnet-027972ca509b52b83'
+          - 'subnet-0de4c0f32776e60d8'
+
+  # EKS Fargate Profile
+  EKSFargateProfile:
+    Type: 'AWS::EKS::FargateProfile'
+    Properties:
+      ClusterName: !Ref EKSCluster
+      FargateProfileName: MyFargateProfile
+      PodExecutionRoleArn: !GetAtt EKSFargatePodExecutionRole.Arn
+      Subnets:
+        - 'subnet-027972ca509b52b83'
+        - 'subnet-0de4c0f32776e60d8'
+      Selectors:
+        - Namespace: default
+        - Namespace: kube-system 
+        - Namespace: cert-manager
+
+  # EKS Fargate Pod Execution Role
+  EKSFargatePodExecutionRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - eks-fargate-pods.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonEKSFargatePodExecutionRolePolicy
+      Tags:
+        - Key: Name
+          Value: EKSFargatePodExecutionRole
+
+Outputs:
+  EKSClusterName:
+    Description: EKS Cluster Name
+    Value: !Ref EKSCluster
+  EKSClusterEndpoint:
+    Description: EKS Cluster Endpoint
+    Value: !GetAtt EKSCluster.Endpoint
+  EKSClusterArn:
+    Description: EKS Cluster ARN
+    Value: !GetAtt EKSCluster.Arn

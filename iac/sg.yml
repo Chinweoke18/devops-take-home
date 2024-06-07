@@ -1,0 +1,38 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Security Group for Load Balancer with Specific Rules'
+
+Resources:
+  LoadBalancerSecurityGroup:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: 'Security group for Load Balancer with specific ingress and egress rules'
+      VpcId: 'vpc-0e9c7badc94f6b722'  
+      SecurityGroupEgress:
+        - IpProtocol: '-1'
+          CidrIp: '0.0.0.0/0' 
+      SecurityGroupIngress:
+        - IpProtocol: 'tcp'
+          FromPort: 80
+          ToPort: 80
+          CidrIp: '0.0.0.0/0'  
+        - IpProtocol: 'tcp'
+          FromPort: 443
+          ToPort: 443
+          CidrIp: '0.0.0.0/0'  
+        - IpProtocol: 'icmp'
+          FromPort: -1
+          ToPort: -1
+          CidrIp: '0.0.0.0/0' 
+        - IpProtocol: 'tcp'
+          FromPort: 0
+          ToPort: 65535
+          CidrIp: '10.0.0.0/16'  
+        - IpProtocol: 'udp'
+          FromPort: 0
+          ToPort: 65535
+          CidrIp: '10.0.0.0/16'  
+
+Outputs:
+  SecurityGroupId:
+    Description: 'Security Group ID'
+    Value: !Ref LoadBalancerSecurityGroup

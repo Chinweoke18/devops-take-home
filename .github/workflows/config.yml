@@ -25,8 +25,6 @@ jobs:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{ secrets.AWS_REGION }}
-        # role-to-assume: arn:aws:iam::211125593418:role/github-actions-role
-        # aws-region: us-east-1
   
     - name: Log in to Amazon ECR
       id: login-ecr
@@ -52,7 +50,7 @@ jobs:
     - name: Setup kubectl
       uses: azure/setup-kubectl@v3
       with:
-        version: v1.21.0  # Ensure this matches your EKS version
+        version: v1.21.0 
 
     - name: Update kubeconfig
       run: |

@@ -1,27 +1,32 @@
-# DevOps take-home
-This is a hands-on assessment of Infrastructure-as-Code (IaC), CI/CD, and public cloud providers. Use AWS as the platform of choice; you may use the `AWS Cloud Development Kit (CDK)` — preferably, or `CloudFormation`. Please do not spend more than 3-4 hours on this task. You're not expected to set up your own personal cloud account, but there should be enough configuration details so that deploying to a real cloud environment will theoretically work. Be prepared to justify your design.
+# Steps - Environment setup
 
-## Setup:
-- Create a repository in your own GitHub account and use the free tier of GitHub Actions.
+## Apply the ./iac/vpc.yml file:
+aws cloudformation create-stack --stack-name EKSVPC --template-body file://vpc.yml --capabilities CAPABILITY_NAMED_IAM
 
-## Background:
-A simple Flask webserver that displays "Hello, from MAX!" runs on a EKS fargate cluster on the AWS Cloud. The cluster that runs it has several security group rules associated. The firewall rules are:
+## Apply the ./iac/eks.yml file:
+aws cloudformation create-stack --stack-name EKSFargateCluster --template-body file://eks.yml --capabilities CAPABILITY_NAMED_IAM
 
-- Allow all egress
-- Deny all ingress, but allow:
-```
-TCP Ports 80, 443 from everywhere on the internet
-ICMP (ping) from  everywhere on the internet
-Allow all tcp/udp internal traffic within the VPC
-```
+## Patch the coredns to add tolerations
+kubectl -n kube-system patch deployment coredns --type=json -p='[{"op": "add", "path": "/spec/template/spec/tolerations", "value": [{"key": "eks.amazonaws.com/compute-type", "operator": "Equal", "value": "fargate", "effect": "NoSchedule"}]}]'
 
-## The problem:
-The above cloud-native application was manually configured using Web console UIs, and it was accidentally deleted by a junior developer. Neither the cloud security group rules nor the EKS cluster configuration were captured in IaC. Your assignment is to create the cloud resources in configuration files and set up CI/CD to create/update the rules based on code changes in the master branch. This would allow arbitrary deployments of the application stack, resilient to incidents. It also allows a team of DevOps engineers to collaborate on new infrastructure definitions.
+## Install AWS ALB controller
+Follow the instruction in the url Below:
+https://docs.aws.amazon.com/eks/latest/userguide/lbc-helm.html
 
-## Requirements:
-- Update the `./github/workflows/config.yml` file that installs CLI tools as needed, configures authentication, performs basic sanity tests, and deploys resources; and set up CI/CD using GitHub Actions to create/update the resources based on code changes in the main branch.
-- Use AWS CDK (preferably) or CloudFormation to define the infrastructure in configuration file(s) that includes a VPC network for the EKS Fargate cluster, and security group rules.
-- (Theoretically deployed) EKS Fargate cluster that runs the Python webserver container defined in `app.py` on startup and any restarts. The Dockerfile for building the container image is already provided.
-- (Theoretically deployed) Working AWS Application Load Balancer via an Ingress controller to see "Hello, from MAX!" in a web browser. Provide Kubernetes manifest files (e.g., deployment, service, ingress) for deploying the Flask application on the EKS Fargate cluster.
-- Basic Documentation (README.md) that includes installation instructions, usage examples, and any assumptions made; and an architecture diagram.
-- Avoid unnecessary abstractions in the form of configuration templates and/or modules.
+NOTE: Edit the cluster name and the AWS account ID to yours
+
+
+# Steps - App Deployment
+
+## Open ./github/workflows/config.yml, replace the values below with your details
+  AWS_REGION: <region>
+  AWS_ACCOUNT_ID: <aws-account-id>  
+  ECR_REPOSITORY: <full-ECR-URL>
+  EKS_CLUSTER_NAME: <your-clustyer-name>
+  Also, store AWS access key and secret key as a git secret
+
+  ## Push the code to you repository. 
+  This will build the docker image, tag and upload the image to ECR. It will also pull the image and deploy to you kubernetes cluster
+
+## Test your deploy
+Go to EC2, Locate loadbalancer, access the loadbalancer DNS from your browser
